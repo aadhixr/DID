@@ -12,6 +12,9 @@ import androidx.navigation.compose.*
 import com.diskwala.recreated.ui.screens.*
 import com.diskwala.recreated.ui.theme.DarkBackground
 import com.diskwala.recreated.ui.theme.DarkThemeColors
+import java.net.URLDecoder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,11 +33,14 @@ class MainActivity : ComponentActivity() {
 }
 
 sealed class Screen(val route: String, val title: String) {
-    object Drama : Screen("drama", "Drama")
+    object Stream : Screen("stream", "Stream")
     object Downloads : Screen("downloads", "Downloads")
-    object You : Screen("you", "You")
+    object You : Screen("you", "History")
     object Player : Screen("player/{mediaId}", "Player") {
-        fun createRoute(mediaId: String) = "player/$mediaId"
+        fun createRoute(mediaId: String): String {
+            val encoded = URLEncoder.encode(mediaId, StandardCharsets.UTF_8.toString())
+            return "player/$encoded"
+        }
     }
 }
 
@@ -44,7 +50,7 @@ fun AppNavigation() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val bottomNavItems = listOf(Screen.Drama, Screen.Downloads, Screen.You)
+    val bottomNavItems = listOf(Screen.Stream, Screen.Downloads, Screen.You)
     val showBottomBar = currentRoute in bottomNavItems.map { it.route }
 
     Scaffold(
@@ -71,12 +77,12 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Drama.route,
+            startDestination = Screen.Stream.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Drama.route) {
-                DramaScreen(onPlayDrama = { id ->
-                    navController.navigate(Screen.Player.createRoute(id))
+            composable(Screen.Stream.route) {
+                StreamInputScreen(onStreamUrl = { mediaTarget ->
+                    navController.navigate(Screen.Player.createRoute(mediaTarget))
                 })
             }
             composable(Screen.Downloads.route) {
@@ -88,7 +94,12 @@ fun AppNavigation() {
                 YouScreen(recentFiles = emptyList(), onClearHistory = {})
             }
             composable(Screen.Player.route) { backStackEntry ->
-                val mediaId = backStackEntry.arguments?.getString("mediaId") ?: ""
+                val encodedId = backStackEntry.arguments?.getString("mediaId") ?: ""
+                val mediaId = try {
+                    URLDecoder.decode(encodedId, StandardCharsets.UTF_8.toString())
+                } catch (e: Exception) {
+                    encodedId
+                }
                 CustomPlayerScreen(
                     mediaId = mediaId,
                     onBack = { navController.popBackStack() }
