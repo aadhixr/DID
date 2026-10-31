@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiskWala Stream Player</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- HLS.js for m3u8 streaming support in all browsers -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DiskWala Direct Streamer</h1>
+            <p>Paste any DiskWala link or direct video URL to stream instantly without ads</p>
+        </header>
+
+        <section class="input-card">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="streamInput" 
+                    placeholder="Paste link (e.g., https://www.diskwala.com/app/6ae5ec01b61fd14efb259e0e or .m3u8/.mp4)"
+                    autocomplete="off"
+                >
+                <button id="streamBtn" onclick="handleStreamClick()">Stream Now</button>
+            </div>
+            <div id="statusMessage" class="status-msg"></div>
+            
+            <div class="quick-examples">
+                <span>Quick Test:</span>
+                <button type="button" class="chip" onclick="loadSample('https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4')">Sample MP4</button>
+                <button type="button" class="chip" onclick="loadSample('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">Sample HLS (m3u8)</button>
+            </div>
+        </section>
+
+        <section class="player-container" id="playerWrapper">
+            <video id="videoPlayer" controls playsinline></video>
+            <div id="playerOverlay" class="player-overlay hidden">
+                <div class="spinner"></div>
+                <span id="spinnerText">Resolving stream link...</span>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
